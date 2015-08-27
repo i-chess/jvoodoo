@@ -9,9 +9,5 @@
 
 package com.ichess.jvoodoo;
 
-public class Something {
-    public int square(int x)
-    {
-        return x*x;
-    }
+public class SomethingSubClass extends Something {
 }

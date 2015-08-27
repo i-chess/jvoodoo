@@ -113,8 +113,7 @@ public class Scenario {
             LOGGER.fine("Scenario " + name + " does not expect '" + methodName + "' : expecting method name '" + ((Invocation) event).getMethodName() + "'");
             return false;
         }
-        LOGGER.fine("Scenario " + name + " expected invocation of " + name + "." + methodName +
-                " with parameters " + Arrays.toString(parameters) + " return value " + ((Invocation) event).getReturnHandle());
+        //LOGGER.fine("Scenario " + name + " expected invocation of " + name + "." + methodName + " with parameters " + Arrays.toString(parameters) + " return value " + ((Invocation) event).getReturnHandle());
         event.consumeParameters(parameters);
         Object returned = null;
         try

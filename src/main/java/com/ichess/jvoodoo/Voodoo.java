@@ -10,13 +10,11 @@
 package com.ichess.jvoodoo;
 
 import javassist.*;
+import javassist.Modifier;
 import org.junit.Assert;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,7 +69,6 @@ public class Voodoo {
         {
             if ( _voodooInstances.get(name) == instance)
             {
-                LOGGER.fine("instance " + instance + " name is '" + name + "'");
                 return name;
             }
         }
@@ -193,27 +190,64 @@ public class Voodoo {
                 LOGGER.fine("new default constructor for " + ctClass.getName() + " modifiers " + Integer.toHexString(defaultConstructor.getModifiers()) + " body : '" + body + "'");
             }
 
-            CtMethod[] ctMethods = baseClass.getDeclaredMethods();
+            // declared methods are also private and protected, but does not include inherited
+            List<CtMethod> ctMethods = new ArrayList(Arrays.asList(baseClass.getDeclaredMethods()));
+            // add getMethods, that also add inherited public (protected ?) methods
+            ctMethods.addAll(Arrays.asList(baseClass.getMethods()));
             for (CtMethod ctMethod : ctMethods)
             {
                 LOGGER.fine("found method " + ctClass.getName() + ":" + ctMethod.getName() + " declared by " + ctMethod.getDeclaringClass().getName() +
                         " modifiers " + Integer.toHexString(ctMethod.getModifiers()) + " signature " + ctMethod.getSignature());
 
+                if ((ctMethod.getModifiers() & java.lang.reflect.Modifier.NATIVE ) != 0)
+                {
+                    // skip native methods
+                    continue;
+                }
+
+                CtClass declaringClass = ctMethod.getDeclaringClass();
+                if (declaringClass.isFrozen()) {
+                    // declared in frozen super class (i.e Object, etc). skip
+                    continue;
+                }
+
+                if (ctMethod.getName().equals("toString")) {
+                    // don't voodoo toString method
+                    // TODO handle this correctly
+                    continue;
+                }
+                if (ctMethod.getName().equals("equals")) {
+                    // don't voodoo toString method
+                    // TODO handle this correctly
+                    continue;
+                }
+                LOGGER.fine("voodoo method " + ctClass.getName() + ":" + ctMethod.getName() + " declared by " + ctMethod.getDeclaringClass().getName() +
+                        " modifiers " + Integer.toHexString(ctMethod.getModifiers()) + " signature " + ctMethod.getSignature());
+
                 CtMethod actualMethod = ctMethod;
                 if (implementingClass != null)
                 {
-                    ctMethod.setModifiers(ctMethod.getModifiers() & (~java.lang.reflect.Modifier.FINAL));
-
+                    // interface method implemented by a class
                     actualMethod = new CtMethod(ctMethod.getReturnType(), ctMethod.getName(), ctMethod.getParameterTypes(), implementingClass);
                     implementingClass.addMethod(actualMethod);
                 }
+                else if (! (declaringClass.equals(baseClass))) {
+                    if ((ctMethod.getModifiers() & (java.lang.reflect.Modifier.FINAL)) != 0) {
+                        // final inherited method. skip for now
+                        continue;
+                    }
+                    // method declared in super class. create it in base class
+                    actualMethod = new CtMethod(ctMethod.getReturnType(), ctMethod.getName(), ctMethod.getParameterTypes(), baseClass);
+                    baseClass.addMethod(actualMethod);
+                }
+
+                ctMethod.setModifiers(ctMethod.getModifiers() & (~java.lang.reflect.Modifier.FINAL));
 
                 String invocationMethod = "com.ichess.jvoodoo.Scenarios.expectInvocation";
                 String name;
                 String debugLine = "com.ichess.jvoodoo.Utils.LOGGER.fine( \">>> " + className + ":" + ctMethod.getName() + "\"); ";
                 body = new StringBuffer();
                 boolean isStatic = ((actualMethod.getModifiers() & Modifier.STATIC) != 0);
-                boolean returnSomething = (actualMethod.getReturnType() != CtClass.voidType);
                 CtClass returnClass = actualMethod.getReturnType();
                 String returnClassName = returnClass.getName();
                 String returnStatement = "";

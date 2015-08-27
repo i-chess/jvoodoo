@@ -29,4 +29,5 @@ public class ParameterIsUltimateObject extends com.ichess.jvoodoo.ParameterHandl
     public String toString() {
         return "ultimate object : '" + name + "'";
     }
+
 }

@@ -166,6 +166,13 @@ public class Scenarios {
         return returnValue[0];
     }
 
+    public static double expectInvocationReturns_double(String name, String methodName, Object... parameters)
+    {
+        Double[] returnValue = new Double[1];
+        expectInvocationInternal(name, methodName, returnValue, parameters);
+        return returnValue[0];
+    }
+
     public static void expectInvocation(String name, String methodName, Object... parameters)
     {
         expectInvocationInternal(name, methodName, new Object[] { null }, parameters);
