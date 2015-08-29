@@ -9,17 +9,7 @@
 
 package com.ichess.jvoodoo;
 
-public class Something {
+import java.util.ArrayList;
 
-    public Something() {
-        init();
-    }
-
-    public void init() {
-
-    }
-    public int square(int x)
-    {
-        return x*x;
-    }
+public class ListOfIntegers extends ArrayList<Integer> {
 }

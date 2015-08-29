@@ -47,9 +47,9 @@
     <target name="compile" depends="clean" description="compile the Java sources" >
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/test"/>
-        <javac target="1.6" classpathref="classpath" encoding="UTF-8" debug="true" srcdir="${src.dir}" destdir="${build.dir}" verbose="${debug}" includeantruntime="false">
+        <javac classpathref="classpath" encoding="UTF-8" debug="true" srcdir="${src.dir}" destdir="${build.dir}" verbose="${debug}" includeantruntime="false">
         </javac>
-        <javac target="1.6"  classpathref="classpath" encoding="UTF-8" debug="true" srcdir="${test.dir}" destdir="${build.dir}/test" verbose="${debug}" includeantruntime="false">
+        <javac classpathref="classpath" encoding="UTF-8" debug="true" srcdir="${test.dir}" destdir="${build.dir}/test" verbose="${debug}" includeantruntime="false">
         </javac>
     </target>
 
@@ -77,5 +77,6 @@
             <formatter type="brief" usefile="false"/>
         </junit>
     </target>
+
     <target name="all" depends="clean, compile, test, jar" />
 </project>

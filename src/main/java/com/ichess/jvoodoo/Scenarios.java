@@ -70,9 +70,9 @@ public class Scenarios {
         Assert.assertTrue("Not all scenarios finished", allScenariosFinished());
     }
 
-    public static void expectConstruction(Object instance, Object... parameters)
+    public static void expectConstruction(Object instance, String className, Object... parameters)
     {
-        String className = instance.getClass().getName();
+        // String className = instance.getClass().getName();
         LOGGER.fine("Expecting construction of " + className + " with parameters " + Arrays.toString(parameters));
         for (Scenario scenario : scenarios.values())
         {
@@ -92,8 +92,15 @@ public class Scenarios {
             return;
         }
 
+        LOGGER.warning("No scenario expected construction of " + className + " with parameters " +
+            Arrays.toString(parameters));
+        for (Scenario scenario : scenarios.values()) {
+            if (scenario.expects() != null ) {
+                LOGGER.info("Scenario " + scenario + " Expecting " + scenario.expects());
+            }
+        }
         Assert.fail("No scenario expected construction of " + className + " with parameters " +
-                Arrays.toString(parameters));
+            Arrays.toString(parameters));
     }
 
     private static void expectInvocationInternal(String name, String methodName, Object[] returnValue, Object... parameters)

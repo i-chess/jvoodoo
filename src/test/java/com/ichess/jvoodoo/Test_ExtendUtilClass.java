@@ -9,11 +9,11 @@
 package com.ichess.jvoodoo;
 import junit.framework.TestCase;
 
-public class Test_InheritedMethods extends TestCase {
+public class Test_ExtendUtilClass extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Voodoo.castVoodooOn("com.ichess.jvoodoo.SomethingSubClass");
+        Voodoo.castVoodooOn("com.ichess.jvoodoo.ListOfIntegers");
     }
 
     @Override
@@ -21,13 +21,12 @@ public class Test_InheritedMethods extends TestCase {
 
     }
 
-    public void test_inheritedPublicMethod() {
+    public void test_ExtendUtilClass() {
         Scenario scenario = new Scenario();
-        scenario.add(new Construction("com.ichess.jvoodoo.Something", "fake something"));
-        scenario.add(new Construction("com.ichess.jvoodoo.SomethingSubClass", "fake something sub class"));
-        scenario.add(new Invocation("fake something sub class", "square", 100, new ParameterEquals(10)));
-        SomethingSubClass test = new SomethingSubClass();
-        test.square(10);
+        scenario.add(new Construction("com.ichess.jvoodoo.ListOfIntegers", "fake list"));
+        scenario.add(new Invocation("fake list", "add", true, new ParameterEquals(new Integer(1))));
+        ListOfIntegers test = new ListOfIntegers();
+        test.add(1);
         scenario.assertFinished();
     }
 }

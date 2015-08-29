@@ -56,7 +56,12 @@ public class Voodoo {
         return object;
     }
 
+    // a voodoo class that is constructed now by the voodoo mechanism, so it should not expect construction
     public static String VOODOO_CONSTRUCTING_CLASS;
+
+    // name of voodoo class that is constructed now, so if a subclass of it calls any class method it should
+    // not expect invocation
+    public static String VOODOO_IN_CONSTRUCTOR_OF;
 
     public static void addInstance(String instanceName, Object instance)
     {
@@ -82,7 +87,7 @@ public class Voodoo {
             castVoodooOn(className);
         }
         Assert.assertTrue( "Instance name '" + instanceName + "' is actually a class name", ! _voodooClasses.containsKey(instanceName));
-        Assert.assertTrue( "Instance name '" + instanceName + "' already exists", ! _voodooInstances.containsKey(instanceName));
+        Assert.assertTrue("Instance name '" + instanceName + "' already exists", !_voodooInstances.containsKey(instanceName));
         try
         {
             Class c = _voodooClasses.get(className);
@@ -154,6 +159,15 @@ public class Voodoo {
                 className = implementingClassName;
             }
 
+            String classNameWithQuotes = "\"" + className + "\"";
+            CtClass superClass = ctClass.getSuperclass();
+            while (! superClass.getName().equals("java.lang.Object")) {
+                if ((! isVoodooClass(superClass.getName())) && (! superClass.getPackageName().startsWith("java"))) {
+                    castVoodooOn(superClass.getName());
+                }
+                superClass = superClass.getSuperclass();
+            }
+
             CtField[] ctFields = ctClass.getDeclaredFields();
             for (CtField ctField : ctFields)
             {
@@ -161,16 +175,24 @@ public class Voodoo {
                 setPublic(ctField);
             }
 
-            CtConstructor[] ctConstructors = ctClass.getDeclaredConstructors();
+            CtField constructingField = new CtField(CtClass.booleanType, "__VOODOO__CONSTRUCTED", ctClass);
+            ctClass.addField(constructingField);
+            String constructEndLine = "__VOODOO__CONSTRUCTED = true;";
+
+            List<CtConstructor> ctConstructors = new ArrayList<CtConstructor>( Arrays.asList(ctClass.getDeclaredConstructors() ) );
             boolean hasDefaultConstructor = false;
             for (CtConstructor ctConstructor : ctConstructors)
             {
                 LOGGER.fine("found constructor " + ctConstructor.getName() + " signature " + ctConstructor.getSignature());
                 body = new StringBuffer();
                 String debugLine = "com.ichess.jvoodoo.Utils.LOGGER.fine( \">>> " + className + ":" + ctConstructor.getSignature() + "\"); ";
-                body.append("{" +
-                    debugLine +
-                    "if ( ! \"" + className + "\".equals( com.ichess.jvoodoo.Voodoo.VOODOO_CONSTRUCTING_CLASS ) ) " + " com.ichess.jvoodoo.Scenarios.expectConstruction( this, $args ); }");
+                body.append(
+                        "{" +
+                        debugLine +
+                        "if ( ! " + classNameWithQuotes + ".equals( com.ichess.jvoodoo.Voodoo.VOODOO_CONSTRUCTING_CLASS ) ) " + " com.ichess.jvoodoo.Scenarios.expectConstruction( this, " + classNameWithQuotes + ", $args );" +
+                        constructEndLine +
+                        "}"
+                );
                 LOGGER.fine("new constructor body : '" + body + "'");
                 ctConstructor.setBody(body.toString());
                 setPublic(ctConstructor);
@@ -179,11 +201,17 @@ public class Voodoo {
                     hasDefaultConstructor = true;
                 }
             }
+
             if (! hasDefaultConstructor)
             {
                 CtConstructor defaultConstructor = new CtConstructor( new CtClass[0], ctClass);
                 body = new StringBuffer();
-                body.append("{ if ( ! \"" + className + "\".equals( com.ichess.jvoodoo.Voodoo.VOODOO_CONSTRUCTING_CLASS ) ) " + " com.ichess.jvoodoo.Scenarios.expectConstruction( this, $args ); }");
+                body.append(
+                    "{" +
+                    "if ( ! " + classNameWithQuotes + ".equals( com.ichess.jvoodoo.Voodoo.VOODOO_CONSTRUCTING_CLASS ) ) " + " com.ichess.jvoodoo.Scenarios.expectConstruction( this, " + classNameWithQuotes + ", $args ); " +
+                    constructEndLine +
+                    "}"
+                );
                 defaultConstructor.setBody(body.toString());
                 ctClass.addConstructor(defaultConstructor);
                 setPublic(defaultConstructor);
@@ -252,29 +280,43 @@ public class Voodoo {
                 String returnClassName = returnClass.getName();
                 String returnStatement = "";
                 String castResult = "";
+                String emptyReturnStatement = "return ;";
                 if (returnClass != CtClass.voidType) {
                     returnStatement = "return ";
                     invocationMethod = invocationMethod + "Returns";
                     castResult = "(" + returnClassName + ")";
+                    emptyReturnStatement = "return null;";
                     if (returnClass.isPrimitive()) {
                         invocationMethod += "_" + returnClass.getName();
+                        emptyReturnStatement = "return com.ichess.jvoodoo.Voodoo.returnEmpty_" + returnClass.getName() + "();";
                     }
                 }
                 if (isStatic)
                 {
-                    name = "\"" + className + "\"";
+                    name = classNameWithQuotes;
                 }
                 else {
                     name = "com.ichess.jvoodoo.Voodoo.getInstanceName(this)";
                 }
-                body.append("{ " +
-                        debugLine +
-                        returnStatement +
-                        castResult +
-                        invocationMethod +
-                        "( " + name + ", \"" + actualMethod.getName() + "\", $args ) " +
-                        "; }");
-                actualMethod.setBody(body.toString());
+                String checkConstruction = "if ( ! __VOODOO__CONSTRUCTED ) " + emptyReturnStatement;
+
+                body.append(
+                    "{" +
+                    debugLine +
+                    checkConstruction +
+                    returnStatement +
+                    castResult +
+                    invocationMethod +
+                    "( " + name + ", \"" + actualMethod.getName() + "\", $args ); " +
+                    "}"
+                );
+
+                try {
+                    actualMethod.setBody(body.toString());
+                } catch (javassist.CannotCompileException ex) {
+                    LOGGER.warning("failed to set body to '" + body + "'");
+                    throw ex;
+                }
                 setPublic(actualMethod);
                 actualMethod.setModifiers(actualMethod.getModifiers() & (~java.lang.reflect.Modifier.ABSTRACT));
                 LOGGER.fine("new method : '" + ctClass.getName() + ":" + actualMethod.getName() + " : modifiers " +
@@ -286,8 +328,8 @@ public class Voodoo {
                 LOGGER.fine("Writing Class " + baseClass.getName() + " with modifiers " + Integer.toHexString(baseClass.getModifiers()));
                 _voodooClasses.put(baseClass.getName(), baseClass.toClass());
             }
-            ctClass.setModifiers(ctClass.getModifiers() & (~ java.lang.reflect.Modifier.INTERFACE));
-            ctClass.setModifiers(ctClass.getModifiers() & (~ java.lang.reflect.Modifier.ABSTRACT));
+            ctClass.setModifiers(ctClass.getModifiers() & (~java.lang.reflect.Modifier.INTERFACE));
+            ctClass.setModifiers(ctClass.getModifiers() & (~java.lang.reflect.Modifier.ABSTRACT));
             LOGGER.fine("Writing Class " + ctClass.getName() + " with modifiers " + Integer.toHexString(ctClass.getModifiers()));
             _voodooClasses.put(ctClass.getName(), ctClass.toClass());
         }
@@ -298,4 +340,10 @@ public class Voodoo {
         }
         LOGGER.fine("Casted jvoodoo on class " + className);
     }
+
+    public static boolean returnEmpty_boolean() { return false; };
+    public static double returnEmpty_double() { return 0; };
+    public static float returnEmpty_float() { return 0; };
+    public static int returnEmpty_int() { return 0; };
+    public static long returnEmpty_long() { return 0; };
 }

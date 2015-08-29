@@ -175,5 +175,9 @@ public class Scenario {
         Assert.assertTrue("Scenario " + name + " not finished", events.isEmpty());
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
 
 }

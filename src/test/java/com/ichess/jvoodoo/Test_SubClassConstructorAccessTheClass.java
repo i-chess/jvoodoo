@@ -9,7 +9,7 @@
 package com.ichess.jvoodoo;
 import junit.framework.TestCase;
 
-public class Test_InheritedMethods extends TestCase {
+public class Test_SubClassConstructorAccessTheClass extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
@@ -21,13 +21,12 @@ public class Test_InheritedMethods extends TestCase {
 
     }
 
-    public void test_inheritedPublicMethod() {
+    public void test_SubClassConstructorAccessTheClass() {
         Scenario scenario = new Scenario();
         scenario.add(new Construction("com.ichess.jvoodoo.Something", "fake something"));
         scenario.add(new Construction("com.ichess.jvoodoo.SomethingSubClass", "fake something sub class"));
-        scenario.add(new Invocation("fake something sub class", "square", 100, new ParameterEquals(10)));
         SomethingSubClass test = new SomethingSubClass();
-        test.square(10);
         scenario.assertFinished();
     }
+
 }

@@ -9,17 +9,5 @@
 
 package com.ichess.jvoodoo;
 
-public class Something {
-
-    public Something() {
-        init();
-    }
-
-    public void init() {
-
-    }
-    public int square(int x)
-    {
-        return x*x;
-    }
+public class RandomWrapper extends java.util.Random {
 }
