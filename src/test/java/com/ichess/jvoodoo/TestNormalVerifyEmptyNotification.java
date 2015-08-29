@@ -8,22 +8,22 @@
 //==============================================================================
 package com.ichess.jvoodoo;
 import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestNormalVerifyEmptyNotification extends TestCase {
+import static org.junit.Assert.*;
 
-    @Override
-    protected void setUp() throws Exception {
+public class TestNormalVerifyEmptyNotification  {
+
+    @Before
+    public void setUp() throws Exception {
         Voodoo.castVoodooOn("com.ichess.jvoodoo.Something");
         Voodoo.castVoodooOn("com.ichess.jvoodoo.EmptyNotifier");
         Voodoo.castVoodooOn("com.ichess.jvoodoo.EmptyNotifierInterface");
         Voodoo.castVoodooOn("com.ichess.jvoodoo.NotifierWithParameters");
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-
-    }
-
+    @Test
     public void test_NormalVerifyEmptyNotification()
     {
         QueueThatNotifiesWhenEmpty tested = new QueueThatNotifiesWhenEmpty( (EmptyNotifier) UltimateObject.create("com.ichess.jvoodoo.EmptyNotifier", "fake notifier"));

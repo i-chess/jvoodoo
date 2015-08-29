@@ -9,7 +9,7 @@
 
 package com.ichess.jvoodoo;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ParameterIsUltimateObject extends com.ichess.jvoodoo.ParameterHandle {
 

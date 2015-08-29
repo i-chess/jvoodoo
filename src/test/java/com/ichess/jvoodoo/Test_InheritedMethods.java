@@ -8,19 +8,19 @@
 //==============================================================================
 package com.ichess.jvoodoo;
 import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class Test_InheritedMethods extends TestCase {
+import static org.junit.Assert.*;
 
-    @Override
-    protected void setUp() throws Exception {
+public class Test_InheritedMethods  {
+
+    @Before
+    public void setUp() throws Exception {
         Voodoo.castVoodooOn("com.ichess.jvoodoo.SomethingSubClass");
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-
-    }
-
+    @Test
     public void test_inheritedPublicMethod() {
         Scenario scenario = new Scenario();
         scenario.add(new Construction("com.ichess.jvoodoo.Something", "fake something"));

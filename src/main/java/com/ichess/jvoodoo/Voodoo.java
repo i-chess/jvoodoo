@@ -10,12 +10,11 @@
 package com.ichess.jvoodoo;
 
 import javassist.*;
-import javassist.Modifier;
 import org.junit.Assert;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Voodoo {

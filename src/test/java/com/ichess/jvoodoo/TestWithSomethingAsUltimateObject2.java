@@ -9,22 +9,22 @@
 package com.ichess.jvoodoo;
 import com.ichess.jvoodoo.*;
 import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestWithSomethingAsUltimateObject2 extends TestCase {
+import static org.junit.Assert.*;
 
-    @Override
-    protected void setUp() throws java.lang.Exception {
+public class TestWithSomethingAsUltimateObject2  {
+
+    @Before
+    public void setUp() throws java.lang.Exception {
         Voodoo.castVoodooOn("com.ichess.jvoodoo.Something");
         Voodoo.castVoodooOn("com.ichess.jvoodoo.EmptyNotifier");
         Voodoo.castVoodooOn("com.ichess.jvoodoo.EmptyNotifierInterface");
         Voodoo.castVoodooOn("com.ichess.jvoodoo.NotifierWithParameters");
     }
 
-    @Override
-    protected void tearDown() throws java.lang.Exception {
-
-    }
-
+    @Test
     public void test_WithSomethingAsUltimateObject2()
     {
         NotifierWithSoemthing notifier = (NotifierWithSoemthing) UltimateObject.create("com.ichess.jvoodoo.NotifierWithSoemthing", "fake notifier with something 2");

@@ -8,19 +8,19 @@
 //==============================================================================
 package com.ichess.jvoodoo;
 import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class Test_ExtendUtilClass extends TestCase {
+import static org.junit.Assert.*;
 
-    @Override
-    protected void setUp() throws Exception {
+public class Test_ExtendUtilClass  {
+
+    @Before
+    public void setUp() throws Exception {
         Voodoo.castVoodooOn("com.ichess.jvoodoo.ListOfIntegers");
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-
-    }
-
+    @Test
     public void test_ExtendUtilClass() {
         Scenario scenario = new Scenario();
         scenario.add(new Construction("com.ichess.jvoodoo.ListOfIntegers", "fake list"));
