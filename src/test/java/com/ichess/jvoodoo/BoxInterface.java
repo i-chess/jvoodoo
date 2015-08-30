@@ -9,20 +9,8 @@
 
 package com.ichess.jvoodoo;
 
-public class Something {
+public interface BoxInterface {
 
-    public Something() {
-        init();
-    }
-
-    public void init() {
-        someField = "hello";
-    }
-    public int square(int x)
-    {
-        return x*x;
-    }
-
-    public String someField;
-
+    public abstract int getWidth();
+    public abstract int getHeight();
 }

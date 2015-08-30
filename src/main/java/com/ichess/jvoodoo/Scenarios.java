@@ -134,6 +134,13 @@ public class Scenarios {
                 return;
             }
         }
+        LOGGER.warning("No scenario expects invocation of " + name + "." + methodName + " with parameters " +
+                Arrays.toString(parameters));
+        for (Scenario scenario : scenarios.values()) {
+            if (scenario.expects() != null ) {
+                LOGGER.info("Scenario " + scenario + " Expecting " + scenario.expects());
+            }
+        }
         Assert.fail("No scenario expects invocation of " + name + "." + methodName + " with parameters " +
                       Arrays.toString(parameters));
     }

@@ -220,7 +220,11 @@ public class Voodoo {
             // declared methods are also private and protected, but does not include inherited
             List<CtMethod> ctMethods = new ArrayList(Arrays.asList(baseClass.getDeclaredMethods()));
             // add getMethods, that also add inherited public (protected ?) methods
-            ctMethods.addAll(Arrays.asList(baseClass.getMethods()));
+            for (CtMethod method : baseClass.getMethods()) {
+                if (! ctMethods.contains(method)) {
+                    ctMethods.add(method);
+                }
+            }
             for (CtMethod ctMethod : ctMethods)
             {
                 LOGGER.fine("found method " + ctClass.getName() + ":" + ctMethod.getName() + " declared by " + ctMethod.getDeclaringClass().getName() +
@@ -254,6 +258,11 @@ public class Voodoo {
                 CtMethod actualMethod = ctMethod;
                 if (implementingClass != null)
                 {
+                    if ((ctMethod.getModifiers() & (java.lang.reflect.Modifier.FINAL)) != 0) {
+                        // final inherited method. skip for now
+                        // TODO handle final method in subclasses
+                        continue;
+                    }
                     // interface method implemented by a class
                     actualMethod = new CtMethod(ctMethod.getReturnType(), ctMethod.getName(), ctMethod.getParameterTypes(), implementingClass);
                     implementingClass.addMethod(actualMethod);
@@ -261,6 +270,7 @@ public class Voodoo {
                 else if (! (declaringClass.equals(baseClass))) {
                     if ((ctMethod.getModifiers() & (java.lang.reflect.Modifier.FINAL)) != 0) {
                         // final inherited method. skip for now
+                        // TODO handle final method in subclasses
                         continue;
                     }
                     // method declared in super class. create it in base class

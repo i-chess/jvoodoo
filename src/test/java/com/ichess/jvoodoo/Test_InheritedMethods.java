@@ -26,8 +26,10 @@ public class Test_InheritedMethods  {
         scenario.add(new Construction("com.ichess.jvoodoo.Something", "fake something"));
         scenario.add(new Construction("com.ichess.jvoodoo.SomethingSubClass", "fake something sub class"));
         scenario.add(new Invocation("fake something sub class", "square", 100, new ParameterEquals(10)));
+        scenario.add(new Invocation("fake something sub class", "getSomeField", "goodbye"));
         SomethingSubClass test = new SomethingSubClass();
         test.square(10);
+        assertEquals(test.getSomeField(), "goodbye");
         scenario.assertFinished();
     }
 }

@@ -10,4 +10,6 @@
 package com.ichess.jvoodoo;
 
 public class SomethingSubClass extends Something {
+
+    public String getSomeField() { return someField; }
 }
