@@ -58,10 +58,6 @@ public class Voodoo {
     // a voodoo class that is constructed now by the voodoo mechanism, so it should not expect construction
     public static String VOODOO_CONSTRUCTING_CLASS;
 
-    // name of voodoo class that is constructed now, so if a subclass of it calls any class method it should
-    // not expect invocation
-    public static String VOODOO_IN_CONSTRUCTOR_OF;
-
     public static void addInstance(String instanceName, Object instance)
     {
         _voodooInstances.put(instanceName, instance);
@@ -300,14 +296,15 @@ public class Voodoo {
                         emptyReturnStatement = "return com.ichess.jvoodoo.Voodoo.returnEmpty_" + returnClass.getName() + "();";
                     }
                 }
+                String checkConstruction = "";
                 if (isStatic)
                 {
                     name = classNameWithQuotes;
                 }
                 else {
                     name = "com.ichess.jvoodoo.Voodoo.getInstanceName(this)";
+                    checkConstruction = "if ( ! __VOODOO__CONSTRUCTED ) " + emptyReturnStatement;
                 }
-                String checkConstruction = "if ( ! __VOODOO__CONSTRUCTED ) " + emptyReturnStatement;
 
                 body.append(
                     "{" +

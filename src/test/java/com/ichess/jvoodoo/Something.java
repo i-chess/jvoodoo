@@ -18,6 +18,7 @@ public class Something {
     public void init() {
         someField = "hello";
     }
+    public static int staticInit() { return 1; }
     public int square(int x)
     {
         return x*x;
